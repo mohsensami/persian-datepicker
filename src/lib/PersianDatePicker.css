@@ -1,0 +1,127 @@
+/* PersianDatePicker.css */
+.persian-date-picker {
+  position: relative;
+  display: inline-block;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  direction: rtl;
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: right;
+  width: 150px;
+  direction: rtl;
+}
+
+.date-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.calendar {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 5px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 250px;
+  padding: 10px;
+  direction: rtl;
+}
+
+.calendar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.calendar-header button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.calendar-header button:hover {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+.calendar table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calendar th,
+.calendar td {
+  text-align: center;
+  padding: 5px;
+}
+
+.calendar th {
+  font-weight: bold;
+  font-size: 12px;
+  color: #555;
+}
+
+.calendar td.day {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.calendar td.day:hover {
+  background-color: #f0f0f0;
+}
+
+.calendar td.selected {
+  background-color: #2196f3;
+  color: white;
+}
+
+.calendar td.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.calendar td.empty {
+  background: none;
+  cursor: default;
+}
+
+.today-button-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.today-button {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.today-button:hover {
+  background-color: #e0e0e0;
+}
