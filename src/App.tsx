@@ -6,7 +6,7 @@ const MyComponent: React.FC = () => {
   return (
     <div className="App">
       <div>
-        <div>
+        <div dir="ltr">
           <h2>انتخاب تاریخ شمسی</h2>
           <PersianDatePicker
             value={selectedDate}
@@ -15,7 +15,7 @@ const MyComponent: React.FC = () => {
             minDate="2023-01-01"
             maxDate="2025-12-31"
           />
-          {selectedDate && <p>تاریخ انتخاب شده: {selectedDate.toString()}</p>}
+          {JSON.stringify(selectedDate)}
         </div>
       </div>
     </div>
