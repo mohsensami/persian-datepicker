@@ -1,6 +1,6 @@
 {
   "name": "@mohsensami/persian-datepicker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "",
   "main": "./dist/persian-datepicker.umd.js",
@@ -42,10 +42,12 @@
   "dependencies": {
     "jalaali-js": "^1.2.8",
     "path": "^0.12.7",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "vite-plugin-dts": "^3.9.1",
     "vite-plugin-lib-inject-css": "^2.1.1"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/jalaali-js": "^1.2.0",

@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  toJalaali,
-  toGregorian,
-  jalaaliMonthLength,
-  isValidJalaaliDate,
-} from "jalaali-js";
+import { toJalaali, toGregorian, jalaaliMonthLength } from "jalaali-js";
 import "./PersianDatePicker.css";
 
 interface PersianDatePickerProps {
