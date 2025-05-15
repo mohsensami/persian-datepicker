@@ -1,236 +1,305 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toJalaali, toGregorian, jalaaliMonthLength } from "jalaali-js";
 import "./PersianDatePicker.css";
 
 interface PersianDatePickerProps {
-  value?: Date | string | null;
+  value: Date | null;
   onChange: (date: Date) => void;
-  className?: string;
+  minDate?: Date;
+  maxDate?: Date;
   placeholder?: string;
-  inputClass?: string;
-  calendarClass?: string;
   disabled?: boolean;
-  minDate?: Date | string;
-  maxDate?: Date | string;
-  showTodayButton?: boolean;
+  className?: string;
+  inputClassName?: string;
+  calendarClassName?: string;
   todayButtonText?: string;
+}
+
+const persianMonthNames = [
+  "فروردین",
+  "اردیبهشت",
+  "خرداد",
+  "تیر",
+  "مرداد",
+  "شهریور",
+  "مهر",
+  "آبان",
+  "آذر",
+  "دی",
+  "بهمن",
+  "اسفند",
+];
+
+const persianWeekDays = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
+
+function formatJalaali(date: Date | null): string {
+  if (!date || isNaN(date.getTime())) return "";
+  const { jy, jm, jd } = toJalaali(date);
+  return `${jy}/${jm.toString().padStart(2, "0")}/${jd
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+function clampDate(date: Date, min?: Date, max?: Date): Date {
+  if (min && date < min) return min;
+  if (max && date > max) return max;
+  return date;
 }
 
 const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   value,
   onChange,
-  className = "",
-  placeholder = "تاریخ را انتخاب کنید",
-  inputClass = "",
-  calendarClass = "",
-  disabled = false,
   minDate,
   maxDate,
-  showTodayButton = true,
+  placeholder = "تاریخ را انتخاب کنید",
+  disabled = false,
+  className = "",
+  inputClassName = "",
+  calendarClassName = "",
   todayButtonText = "امروز",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [inputValue, setInputValue] = useState<string>("");
+  const [viewDate, setViewDate] = useState<Date>(() => value || new Date());
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Parse initial value
   useEffect(() => {
-    if (value) {
-      const date = typeof value === "string" ? new Date(value) : value;
-      if (!isNaN(date.getTime())) {
-        setCurrentDate(date);
-        setInputValue(formatJalaaliDate(date));
-      }
-    }
+    if (value) setViewDate(value);
   }, [value]);
 
-  const toggleCalendar = () => {
-    if (!disabled) {
-      setIsOpen(!isOpen);
-    }
-  };
-
-  const formatJalaaliDate = (date: Date): string => {
-    if (!date || isNaN(date.getTime())) return "";
-    const { jy, jm, jd } = toJalaali(date);
-    return `${jy}/${jm < 10 ? "0" + jm : jm}/${jd < 10 ? "0" + jd : jd}`;
-  };
-
-  const handleDateClick = (day: number, month: number, year: number) => {
-    const gregorianDate = toGregorian(year, month, day);
-    const selectedDate = new Date(
-      gregorianDate.gy,
-      gregorianDate.gm - 1,
-      gregorianDate.gd
-    );
-
-    setCurrentDate(selectedDate);
-    setInputValue(formatJalaaliDate(selectedDate));
-    onChange(selectedDate);
-    setIsOpen(false);
-  };
-
-  const goToPreviousMonth = () => {
-    const { jy, jm } = toJalaali(currentDate);
-    const newMonth = jm === 1 ? 12 : jm - 1;
-    const newYear = jm === 1 ? jy - 1 : jy;
-    const newDate = toGregorian(newYear, newMonth, 1);
-    setCurrentDate(new Date(newDate.gy, newDate.gm - 1, newDate.gd));
-  };
-
-  const goToNextMonth = () => {
-    const { jy, jm } = toJalaali(currentDate);
-    const newMonth = jm === 12 ? 1 : jm + 1;
-    const newYear = jm === 12 ? jy + 1 : jy;
-    const newDate = toGregorian(newYear, newMonth, 1);
-    setCurrentDate(new Date(newDate.gy, newDate.gm - 1, newDate.gd));
-  };
-
-  const goToToday = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    setInputValue(formatJalaaliDate(today));
-    onChange(today);
-    setIsOpen(false);
-  };
-
-  const isDateDisabled = (
-    day: number,
-    month: number,
-    year: number
-  ): boolean => {
-    const date = toGregorian(year, month, day);
-    const gregDate = new Date(date.gy, date.gm - 1, date.gd);
-
-    if (minDate) {
-      const min = typeof minDate === "string" ? new Date(minDate) : minDate;
-      if (gregDate < min) return true;
-    }
-
-    if (maxDate) {
-      const max = typeof maxDate === "string" ? new Date(maxDate) : maxDate;
-      if (gregDate > max) return true;
-    }
-
-    return false;
-  };
-
-  const renderCalendar = () => {
-    const { jy: year, jm: month } = toJalaali(currentDate);
-    const daysInMonth = jalaaliMonthLength(year, month);
-    const firstDay = toGregorian(year, month, 1);
-    const firstDayDate = new Date(firstDay.gy, firstDay.gm - 1, firstDay.gd);
-    const startingDayOfWeek = firstDayDate.getDay();
-    const persianStartingDay = (startingDayOfWeek + 1) % 7;
-
-    const days: JSX.Element[] = [];
-    let dayCounter = 1;
-
-    const monthNames = [
-      "فروردین",
-      "اردیبهشت",
-      "خرداد",
-      "تیر",
-      "مرداد",
-      "شهریور",
-      "مهر",
-      "آبان",
-      "آذر",
-      "دی",
-      "بهمن",
-      "اسفند",
-    ];
-
-    for (let i = 0; i < 6; i++) {
-      const week: JSX.Element[] = [];
-      for (let j = 0; j < 7; j++) {
-        if ((i === 0 && j < persianStartingDay) || dayCounter > daysInMonth) {
-          week.push(<td key={`empty-${i}-${j}`} className="empty"></td>);
-        } else {
-          const isDisabled = isDateDisabled(dayCounter, month, year);
-          const isSelected =
-            value &&
-            formatJalaaliDate(
-              typeof value === "string" ? new Date(value) : value
-            ) ===
-              `${year}/${month < 10 ? "0" + month : month}/${
-                dayCounter < 10 ? "0" + dayCounter : dayCounter
-              }`;
-
-          week.push(
-            <td
-              key={`day-${dayCounter}`}
-              className={`day ${isDisabled ? "disabled" : ""} ${
-                isSelected ? "selected" : ""
-              }`}
-              onClick={() =>
-                !isDisabled && handleDateClick(dayCounter, month, year)
-              }
-            >
-              {dayCounter}
-            </td>
-          );
-          dayCounter++;
-        }
+  // Close calendar on outside click
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node) &&
+        !(e.target as HTMLElement).closest(".pdp-calendar")
+      ) {
+        setIsOpen(false);
       }
-      days.push(<tr key={`week-${i}`}>{week}</tr>);
-      if (dayCounter > daysInMonth) break;
     }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isOpen]);
 
+  const { jy, jm } = toJalaali(viewDate);
+  const daysInMonth = jalaaliMonthLength(jy, jm);
+  const firstDay = new Date(
+    toGregorian(jy, jm, 1).gy,
+    toGregorian(jy, jm, 1).gm - 1,
+    1
+  );
+  const startDayOfWeek = (firstDay.getDay() + 1) % 7; // Persian week starts on Saturday
+
+  function isDisabled(day: number): boolean {
+    const g = toGregorian(jy, jm, day);
+    const d = new Date(g.gy, g.gm - 1, g.gd);
+    if (minDate && d < minDate) return true;
+    if (maxDate && d > maxDate) return true;
+    return false;
+  }
+
+  function handleDayClick(day: number) {
+    if (isDisabled(day)) return;
+    const g = toGregorian(jy, jm, day);
+    const d = new Date(g.gy, g.gm - 1, g.gd);
+    onChange(clampDate(d, minDate, maxDate));
+    setIsOpen(false);
+  }
+
+  function handlePrevMonth() {
+    let newMonth = jm - 1;
+    let newYear = jy;
+    if (newMonth < 1) {
+      newMonth = 12;
+      newYear--;
+    }
+    const g = toGregorian(newYear, newMonth, 1);
+    setViewDate(new Date(g.gy, g.gm - 1, g.gd));
+  }
+
+  function handleNextMonth() {
+    let newMonth = jm + 1;
+    let newYear = jy;
+    if (newMonth > 12) {
+      newMonth = 1;
+      newYear++;
+    }
+    const g = toGregorian(newYear, newMonth, 1);
+    setViewDate(new Date(g.gy, g.gm - 1, g.gd));
+  }
+
+  function handleToday() {
+    const today = new Date();
+    onChange(clampDate(today, minDate, maxDate));
+    setIsOpen(false);
+  }
+
+  function isSelected(day: number): boolean {
+    if (!value) return false;
+    const g = toGregorian(jy, jm, day);
     return (
-      <div className={`calendar ${calendarClass}`}>
-        <div className="calendar-header">
-          <button type="button" onClick={goToPreviousMonth}>
-            &#10094;
-          </button>
-          <span>
-            {monthNames[month - 1]} {year}
-          </span>
-          <button type="button" onClick={goToNextMonth}>
-            &#10095;
-          </button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>ش</th>
-              <th>ی</th>
-              <th>د</th>
-              <th>س</th>
-              <th>چ</th>
-              <th>پ</th>
-              <th>ج</th>
-            </tr>
-          </thead>
-          <tbody>{days}</tbody>
-        </table>
-        {showTodayButton && (
-          <div className="today-button-container">
-            <button type="button" onClick={goToToday} className="today-button">
+      value.getFullYear() === g.gy &&
+      value.getMonth() === g.gm - 1 &&
+      value.getDate() === g.gd
+    );
+  }
+
+  // Calendar grid
+  const weeks: (number | null)[][] = [];
+  let week: (number | null)[] = Array(startDayOfWeek).fill(null);
+  for (let day = 1; day <= daysInMonth; day++) {
+    week.push(day);
+    if (week.length === 7) {
+      weeks.push(week);
+      week = [];
+    }
+  }
+  if (week.length) {
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+
+  return (
+    <div
+      className={`pdp-root ${className}`}
+      style={{ position: "relative", display: "inline-block" }}
+    >
+      <input
+        ref={inputRef}
+        type="text"
+        className={`pdp-input ${inputClassName}`}
+        value={formatJalaali(value)}
+        onClick={() => !disabled && setIsOpen((o) => !o)}
+        placeholder={placeholder}
+        readOnly
+        disabled={disabled}
+        style={{
+          cursor: disabled ? "not-allowed" : "pointer",
+          background: disabled ? "#f5f5f5" : "#fff",
+        }}
+      />
+      {isOpen && (
+        <div
+          className={`pdp-calendar ${calendarClassName}`}
+          style={{
+            position: "absolute",
+            zIndex: 10,
+            top: "110%",
+            right: 0,
+            background: "#fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            borderRadius: 8,
+            padding: 16,
+            minWidth: 260,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 8,
+            }}
+          >
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: 18,
+                cursor: "pointer",
+              }}
+              aria-label="ماه قبل"
+            >
+              &#10094;
+            </button>
+            <span style={{ fontWeight: 600 }}>
+              {persianMonthNames[jm - 1]} {jy}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: 18,
+                cursor: "pointer",
+              }}
+              aria-label="ماه بعد"
+            >
+              &#10095;
+            </button>
+          </div>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                {persianWeekDays.map((d) => (
+                  <th
+                    key={d}
+                    style={{ padding: 4, fontWeight: 500, color: "#888" }}
+                  >
+                    {d}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {weeks.map((week, i) => (
+                <tr key={i}>
+                  {week.map((day, j) =>
+                    day ? (
+                      <td
+                        key={j}
+                        style={{
+                          padding: 4,
+                          textAlign: "center",
+                          borderRadius: 4,
+                          background: isSelected(day)
+                            ? "#1976d2"
+                            : isDisabled(day)
+                            ? "#eee"
+                            : undefined,
+                          color: isSelected(day)
+                            ? "#fff"
+                            : isDisabled(day)
+                            ? "#bbb"
+                            : "#222",
+                          cursor: isDisabled(day) ? "not-allowed" : "pointer",
+                          fontWeight: isSelected(day) ? 700 : 400,
+                        }}
+                        onClick={() => handleDayClick(day)}
+                        aria-disabled={isDisabled(day)}
+                      >
+                        {day}
+                      </td>
+                    ) : (
+                      <td key={j} />
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ marginTop: 12, textAlign: "center" }}>
+            <button
+              type="button"
+              onClick={handleToday}
+              style={{
+                background: "#1976d2",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                padding: "6px 16px",
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
               {todayButtonText}
             </button>
           </div>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div className={`persian-date-picker ${className}`}>
-      <input
-        type="text"
-        value={inputValue}
-        readOnly
-        onClick={toggleCalendar}
-        className={`date-input ${inputClass}`}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
-      {isOpen && (
-        <>
-          <div className="calendar-backdrop" onClick={() => setIsOpen(false)} />
-          {renderCalendar()}
-        </>
+        </div>
       )}
     </div>
   );

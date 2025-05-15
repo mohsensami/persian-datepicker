@@ -5,15 +5,15 @@ const MyComponent: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   return (
     <div className="App">
-      <div>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <div dir="ltr">
           <h2>انتخاب تاریخ شمسی</h2>
           <PersianDatePicker
             value={selectedDate}
             onChange={(date) => setSelectedDate(date)}
             placeholder="تاریخ را انتخاب کنید"
-            minDate="2023-01-01"
-            maxDate="2025-12-31"
+            minDate=""
+            maxDate=""
           />
           {JSON.stringify(selectedDate)}
         </div>
