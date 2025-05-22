@@ -34,7 +34,15 @@ const persianWeekDays = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
 
 function formatJalaali(date: Date | null): string {
   if (!date || isNaN(date.getTime())) return "";
-  const { jy, jm, jd } = toJalaali(date);
+  const localDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    12,
+    0,
+    0
+  );
+  const { jy, jm, jd } = toJalaali(localDate);
   return `${jy}/${jm.toString().padStart(2, "0")}/${jd
     .toString()
     .padStart(2, "0")}`;
@@ -102,7 +110,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   function handleDayClick(day: number) {
     if (isDisabled(day)) return;
     const g = toGregorian(jy, jm, day);
-    const d = new Date(g.gy, g.gm - 1, g.gd);
+    const d = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
     onChange(clampDate(d, minDate, maxDate));
     setIsOpen(false);
   }
@@ -131,18 +139,31 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
 
   function handleToday() {
     const today = new Date();
-    onChange(clampDate(today, minDate, maxDate));
+    const noonToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      12,
+      0,
+      0
+    );
+    onChange(clampDate(noonToday, minDate, maxDate));
     setIsOpen(false);
   }
 
   function isSelected(day: number): boolean {
     if (!value) return false;
     const g = toGregorian(jy, jm, day);
-    return (
-      value.getFullYear() === g.gy &&
-      value.getMonth() === g.gm - 1 &&
-      value.getDate() === g.gd
+    const selectedDate = new Date(
+      value.getFullYear(),
+      value.getMonth(),
+      value.getDate(),
+      12,
+      0,
+      0
     );
+    const compareDate = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
+    return selectedDate.getTime() === compareDate.getTime();
   }
 
   // Calendar grid
