@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { toJalaali, toGregorian, jalaaliMonthLength } from "jalaali-js";
 import "./PersianDatePicker.css";
 
+function toPersianNumber(value: number | string): string {
+  const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  return value.toString().replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+}
+
 interface PersianDatePickerProps {
   value: Date | null;
   onChange: (date: Date) => void;
@@ -43,9 +48,9 @@ function formatJalaali(date: Date | null): string {
     0
   );
   const { jy, jm, jd } = toJalaali(localDate);
-  return `${jy}/${jm.toString().padStart(2, "0")}/${jd
-    .toString()
-    .padStart(2, "0")}`;
+  return `${toPersianNumber(jy)}/${toPersianNumber(
+    jm.toString().padStart(2, "0")
+  )}/${toPersianNumber(jd.toString().padStart(2, "0"))}`;
 }
 
 function clampDate(date: Date, min?: Date, max?: Date): Date {
@@ -205,7 +210,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
               &#10094;
             </button>
             <span className="pdp-month-year">
-              {persianMonthNames[jm - 1]} {jy}
+              {persianMonthNames[jm - 1]} {toPersianNumber(jy)}
             </span>
             <button
               type="button"
@@ -238,7 +243,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
                           color: isSelected(day) ? "#fff" : undefined,
                         }}
                       >
-                        {day}
+                        {toPersianNumber(day)}
                       </td>
                     ) : (
                       <td key={j} />
