@@ -1,6 +1,6 @@
 {
   "name": "@mohsensami/persian-datepicker",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": false,
   "description": "",
   "main": "./dist/persian-datepicker.umd.js",

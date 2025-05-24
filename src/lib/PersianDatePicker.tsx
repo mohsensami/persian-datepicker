@@ -182,10 +182,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   }
 
   return (
-    <div
-      className={`pdp-root ${className}`}
-      style={{ position: "relative", display: "inline-block" }}
-    >
+    <div className={`pdp-root ${className}`}>
       <input
         ref={inputRef}
         type="text"
@@ -195,74 +192,35 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         placeholder={placeholder}
         readOnly
         disabled={disabled}
-        style={{
-          cursor: disabled ? "not-allowed" : "pointer",
-          background: disabled ? "#f5f5f5" : "#fff",
-        }}
       />
       {isOpen && (
-        <div
-          className={`pdp-calendar ${calendarClassName}`}
-          style={{
-            position: "absolute",
-            zIndex: 10,
-            top: "110%",
-            right: 0,
-            background: "#fff",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            borderRadius: 8,
-            padding: 16,
-            minWidth: 260,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
-            }}
-          >
+        <div className={`pdp-calendar ${calendarClassName}`}>
+          <div className="pdp-header">
             <button
               type="button"
               onClick={handlePrevMonth}
-              style={{
-                background: "none",
-                border: "none",
-                fontSize: 18,
-                cursor: "pointer",
-              }}
+              className="pdp-nav-button"
               aria-label="ماه قبل"
             >
               &#10094;
             </button>
-            <span style={{ fontWeight: 600 }}>
+            <span className="pdp-month-year">
               {persianMonthNames[jm - 1]} {jy}
             </span>
             <button
               type="button"
               onClick={handleNextMonth}
-              style={{
-                background: "none",
-                border: "none",
-                fontSize: 18,
-                cursor: "pointer",
-              }}
+              className="pdp-nav-button"
               aria-label="ماه بعد"
             >
               &#10095;
             </button>
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table>
             <thead>
               <tr>
                 {persianWeekDays.map((d) => (
-                  <th
-                    key={d}
-                    style={{ padding: 4, fontWeight: 500, color: "#888" }}
-                  >
-                    {d}
-                  </th>
+                  <th key={d}>{d}</th>
                 ))}
               </tr>
             </thead>
@@ -273,25 +231,12 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
                     day ? (
                       <td
                         key={j}
-                        style={{
-                          padding: 4,
-                          textAlign: "center",
-                          borderRadius: 4,
-                          background: isSelected(day)
-                            ? "#1976d2"
-                            : isDisabled(day)
-                            ? "#eee"
-                            : undefined,
-                          color: isSelected(day)
-                            ? "#fff"
-                            : isDisabled(day)
-                            ? "#bbb"
-                            : "#222",
-                          cursor: isDisabled(day) ? "not-allowed" : "pointer",
-                          fontWeight: isSelected(day) ? 700 : 400,
-                        }}
                         onClick={() => handleDayClick(day)}
                         aria-disabled={isDisabled(day)}
+                        style={{
+                          background: isSelected(day) ? "#1976d2" : undefined,
+                          color: isSelected(day) ? "#fff" : undefined,
+                        }}
                       >
                         {day}
                       </td>
@@ -307,15 +252,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
             <button
               type="button"
               onClick={handleToday}
-              style={{
-                background: "#1976d2",
-                color: "#fff",
-                border: "none",
-                borderRadius: 4,
-                padding: "6px 16px",
-                fontSize: 14,
-                cursor: "pointer",
-              }}
+              className="pdp-today-button"
             >
               {todayButtonText}
             </button>

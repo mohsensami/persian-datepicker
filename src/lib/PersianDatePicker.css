@@ -125,3 +125,139 @@
 .today-button:hover {
   background-color: #e0e0e0;
 }
+
+.pdp-root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.pdp-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+  color: #333;
+}
+
+.pdp-input:hover:not(:disabled) {
+  border-color: #1976d2;
+}
+
+.pdp-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+.pdp-calendar {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  animation: pdp-fade-in 0.2s ease;
+}
+
+@keyframes pdp-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pdp-calendar button {
+  transition: all 0.2s ease;
+}
+
+.pdp-calendar button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+.pdp-calendar table {
+  margin: 12px 0;
+}
+
+.pdp-calendar th {
+  padding: 8px 4px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.pdp-calendar td {
+  padding: 6px;
+  text-align: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.pdp-calendar td:not([aria-disabled="true"]):hover {
+  background-color: rgba(25, 118, 210, 0.08);
+  cursor: pointer;
+}
+
+.pdp-calendar td[aria-disabled="true"] {
+  color: #ccc;
+  background: #f8f8f8;
+  cursor: not-allowed;
+}
+
+.pdp-calendar td[style*="background: rgb(25, 118, 210)"] {
+  background-color: #1976d2 !important;
+  color: white;
+  font-weight: 500;
+}
+
+.pdp-calendar .pdp-today-button {
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdp-calendar .pdp-today-button:hover {
+  background: #1565c0;
+  transform: translateY(-1px);
+}
+
+.pdp-calendar .pdp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pdp-calendar .pdp-month-year {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.pdp-calendar .pdp-nav-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdp-calendar .pdp-nav-button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+  color: #1976d2;
+}
