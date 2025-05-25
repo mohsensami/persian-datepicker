@@ -72,6 +72,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   todayButtonText = "امروز",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showMonthList, setShowMonthList] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(() => value || new Date());
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -171,6 +172,16 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
     return selectedDate.getTime() === compareDate.getTime();
   }
 
+  function handleMonthClick() {
+    setShowMonthList(!showMonthList);
+  }
+
+  function handleMonthSelect(month: number) {
+    const g = toGregorian(jy, month, 1);
+    setViewDate(new Date(g.gy, g.gm - 1, g.gd));
+    setShowMonthList(false);
+  }
+
   // Calendar grid
   const weeks: (number | null)[][] = [];
   let week: (number | null)[] = Array(startDayOfWeek).fill(null);
@@ -209,7 +220,11 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
             >
               &#10094;
             </button>
-            <span className="pdp-month-year">
+            <span
+              className="pdp-month-year"
+              onClick={handleMonthClick}
+              style={{ cursor: "pointer" }}
+            >
               {persianMonthNames[jm - 1]} {toPersianNumber(jy)}
             </span>
             <button
@@ -221,47 +236,70 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
               &#10095;
             </button>
           </div>
-          <table>
-            <thead>
-              <tr>
-                {persianWeekDays.map((d) => (
-                  <th key={d}>{d}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {weeks.map((week, i) => (
-                <tr key={i}>
-                  {week.map((day, j) =>
-                    day ? (
-                      <td
-                        key={j}
-                        onClick={() => handleDayClick(day)}
-                        aria-disabled={isDisabled(day)}
-                        style={{
-                          background: isSelected(day) ? "#1976d2" : undefined,
-                          color: isSelected(day) ? "#fff" : undefined,
-                        }}
-                      >
-                        {toPersianNumber(day)}
-                      </td>
-                    ) : (
-                      <td key={j} />
-                    )
-                  )}
-                </tr>
+          {showMonthList && (
+            <div className="pdp-month-list">
+              {persianMonthNames.map((month, index) => (
+                <div
+                  key={month}
+                  className="pdp-month-item"
+                  onClick={() => handleMonthSelect(index + 1)}
+                  style={{
+                    background: jm === index + 1 ? "#1976d2" : undefined,
+                    color: jm === index + 1 ? "#fff" : undefined,
+                  }}
+                >
+                  {month}
+                </div>
               ))}
-            </tbody>
-          </table>
-          <div style={{ marginTop: 12, textAlign: "center" }}>
-            <button
-              type="button"
-              onClick={handleToday}
-              className="pdp-today-button"
-            >
-              {todayButtonText}
-            </button>
-          </div>
+            </div>
+          )}
+          {!showMonthList && (
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    {persianWeekDays.map((d) => (
+                      <th key={d}>{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeks.map((week, i) => (
+                    <tr key={i}>
+                      {week.map((day, j) =>
+                        day ? (
+                          <td
+                            key={j}
+                            onClick={() => handleDayClick(day)}
+                            aria-disabled={isDisabled(day)}
+                            style={{
+                              background: isSelected(day)
+                                ? "#1976d2"
+                                : undefined,
+                              color: isSelected(day) ? "#fff" : undefined,
+                            }}
+                          >
+                            {toPersianNumber(day)}
+                          </td>
+                        ) : (
+                          <td key={j} />
+                        )
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ marginTop: 12, textAlign: "center" }}>
+                <button
+                  type="button"
+                  onClick={handleToday}
+                  className="pdp-today-button"
+                >
+                  {todayButtonText}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
