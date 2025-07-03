@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import type { JSX } from "react";
 import { toJalaali, toGregorian, jalaaliMonthLength } from "jalaali-js";
 import "./PersianDatePicker.css";
 
@@ -8,8 +9,8 @@ function toPersianNumber(value: number | string): string {
 }
 
 interface PersianDatePickerProps {
-  value: Date | null;
-  onChange: (date: Date) => void;
+  value: Date | null | [Date | null, Date | null];
+  onChange: (date: Date | [Date | null, Date | null]) => void;
   minDate?: Date;
   maxDate?: Date;
   placeholder?: string;
@@ -18,6 +19,7 @@ interface PersianDatePickerProps {
   inputClassName?: string;
   calendarClassName?: string;
   todayButtonText?: string;
+  mode?: "single" | "range";
 }
 
 const persianMonthNames = [
@@ -59,7 +61,7 @@ function clampDate(date: Date, min?: Date, max?: Date): Date {
   return date;
 }
 
-const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
+function PersianDatePicker({
   value,
   onChange,
   minDate,
@@ -70,15 +72,26 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   inputClassName = "",
   calendarClassName = "",
   todayButtonText = "امروز",
-}) => {
+  mode = "single",
+}: PersianDatePickerProps): React.ReactElement | null {
   const [isOpen, setIsOpen] = useState(false);
   const [showMonthList, setShowMonthList] = useState(false);
-  const [viewDate, setViewDate] = useState<Date>(() => value || new Date());
+  const [viewDate, setViewDate] = useState<Date>(() => {
+    if (mode === "range" && Array.isArray(value) && value[0]) return value[0];
+    if (mode === "single" && value instanceof Date) return value;
+    return new Date();
+  });
+  const [range, setRange] = useState<[Date | null, Date | null]>([null, null]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (value) setViewDate(value);
-  }, [value]);
+    if (mode === "range" && Array.isArray(value)) {
+      setRange(value);
+      if (value[0]) setViewDate(value[0]);
+    } else if (mode === "single" && value instanceof Date) {
+      setViewDate(value);
+    }
+  }, [value, mode]);
 
   // Close calendar on outside click
   useEffect(() => {
@@ -117,8 +130,25 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
     if (isDisabled(day)) return;
     const g = toGregorian(jy, jm, day);
     const d = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
-    onChange(clampDate(d, minDate, maxDate));
-    setIsOpen(false);
+    if (mode === "single") {
+      onChange(clampDate(d, minDate, maxDate));
+      setIsOpen(false);
+    } else if (mode === "range") {
+      let [start, end] = range;
+      if (!start || (start && end)) {
+        setRange([d, null]);
+        onChange([d, null]);
+      } else if (start && !end) {
+        if (d < start) {
+          setRange([d, start]);
+          onChange([d, start]);
+        } else {
+          setRange([start, d]);
+          onChange([start, d]);
+        }
+        setIsOpen(false);
+      }
+    }
   }
 
   function handlePrevMonth() {
@@ -158,18 +188,43 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   }
 
   function isSelected(day: number): boolean {
-    if (!value) return false;
+    if (mode === "single") {
+      if (!value || !(value instanceof Date)) return false;
+      const g = toGregorian(jy, jm, day);
+      const selectedDate = new Date(
+        value.getFullYear(),
+        value.getMonth(),
+        value.getDate(),
+        12,
+        0,
+        0
+      );
+      const compareDate = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
+      return selectedDate.getTime() === compareDate.getTime();
+    } else if (mode === "range") {
+      if (!Array.isArray(range)) return false;
+      const [start, end] = range;
+      const g = toGregorian(jy, jm, day);
+      const compareDate = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
+      if (start && compareDate.getTime() === start.setHours(12, 0, 0, 0))
+        return true;
+      if (end && compareDate.getTime() === end.setHours(12, 0, 0, 0))
+        return true;
+      return false;
+    }
+    return false;
+  }
+
+  function isInRange(day: number): boolean {
+    if (mode !== "range" || !Array.isArray(range)) return false;
+    const [start, end] = range;
+    if (!start || !end) return false;
     const g = toGregorian(jy, jm, day);
-    const selectedDate = new Date(
-      value.getFullYear(),
-      value.getMonth(),
-      value.getDate(),
-      12,
-      0,
-      0
-    );
     const compareDate = new Date(g.gy, g.gm - 1, g.gd, 12, 0, 0);
-    return selectedDate.getTime() === compareDate.getTime();
+    return (
+      compareDate > new Date(start.setHours(12, 0, 0, 0)) &&
+      compareDate < new Date(end.setHours(12, 0, 0, 0))
+    );
   }
 
   function handleMonthClick() {
@@ -203,7 +258,17 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         ref={inputRef}
         type="text"
         className={`pdp-input ${inputClassName}`}
-        value={formatJalaali(value)}
+        value={
+          mode === "single"
+            ? formatJalaali(value instanceof Date ? value : null)
+            : Array.isArray(range)
+            ? range[0] && range[1]
+              ? `${formatJalaali(range[0])} - ${formatJalaali(range[1])}`
+              : range[0]
+              ? `${formatJalaali(range[0])} - ...`
+              : ""
+            : ""
+        }
         onClick={() => !disabled && setIsOpen((o) => !o)}
         placeholder={placeholder}
         readOnly
@@ -275,6 +340,8 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
                             style={{
                               background: isSelected(day)
                                 ? "#1976d2"
+                                : isInRange(day)
+                                ? "#90caf9"
                                 : undefined,
                               color: isSelected(day) ? "#fff" : undefined,
                             }}
@@ -304,6 +371,6 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default PersianDatePicker;

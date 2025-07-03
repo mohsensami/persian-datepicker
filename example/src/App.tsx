@@ -18,6 +18,7 @@ function App() {
       >
         <h2>انتخاب تاریخ شمسی</h2>
         <PersianDatePicker
+          mode="range"
           value={date}
           onChange={setDate}
           placeholder="تاریخ را انتخاب کنید"
