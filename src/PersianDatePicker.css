@@ -212,6 +212,7 @@
 
 .pdp-calendar table {
   margin: 12px 0;
+  width: 100%;
 }
 
 .pdp-calendar th {

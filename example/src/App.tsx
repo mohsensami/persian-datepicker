@@ -12,7 +12,10 @@ function App() {
         width: "100%",
       }}
     >
-      <div dir="ltr">
+      <div
+        style={{ width: "300px", margin: "0 auto", textAlign: "center" }}
+        dir="ltr"
+      >
         <h2>انتخاب تاریخ شمسی</h2>
         <PersianDatePicker
           value={date}
